@@ -2,7 +2,9 @@ package com.example.scanovatedemo;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,8 +41,13 @@ public class WebViewActivity extends Activity {
                 Map<String, String> params=getQueryMap(url);
 
                 // Get token from url
-                String token=(String)params.get("token");
+                String token= params.get("token");
 
+                Log.d("Token",token);
+                    SharedPreferences sharedpreferences= getSharedPreferences("pref", Context.MODE_PRIVATE);;
+                    SharedPreferences.Editor editor = sharedpreferences.edit();
+                    editor.putString("token", token);
+                    editor.apply();
                 // Return token
                 Intent returnIntent = new Intent();
                 returnIntent.putExtra("token",token);
@@ -78,7 +85,7 @@ public class WebViewActivity extends Activity {
         WebView.setWebContentsDebuggingEnabled(true);
     }
 
-        webView.loadUrl("url from data response on boarding request");
+        webView.loadUrl("data link");
 }
 
     // Helper func

@@ -8,15 +8,17 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
 public class MainActivity extends AppCompatActivity {
-    boolean isCameraApproved;
+    boolean isCameraApproved = false;
     int MY_PERMISSIONS_REQUEST_CAMERA = 1111;
     private static final String TAG = "MainActivity";
     private static final int requestCode = 51;
@@ -24,8 +26,31 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        checkPermission();
+
+        if (!isCameraApproved)
+        {
+            checkPermission();
+        }
+
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG,"onResume");
+
+        SharedPreferences sharedPref = getSharedPreferences("pref",Context.MODE_PRIVATE);
+        String token = sharedPref.getString("token", "n/a");
+        Log.d("Token on resume",token);
+
+    }
+
 
     private void checkPermission() {
         if (Build.VERSION.SDK_INT >= 23 &&
@@ -35,7 +60,8 @@ public class MainActivity extends AppCompatActivity {
         } else {
             isCameraApproved = true;
             Intent intent = new Intent(this, WebViewActivity.class);
-            startActivity(intent);
+            startActivityForResult(intent, requestCode);
+
         }
     }
 
@@ -79,14 +105,14 @@ public class MainActivity extends AppCompatActivity {
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
 
+        Log.d(TAG, "onActivityResult");
         if (requestCode == requestCode) {
             if(resultCode == Activity.RESULT_OK){
 
                 String token =data.getStringExtra("token");
 
-                Log.i(TAG, "Token: "+token);
+                Log.d("Token form result", token);
 
                 // Use token for getting the result from the server
             }
@@ -95,5 +121,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
+
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }
