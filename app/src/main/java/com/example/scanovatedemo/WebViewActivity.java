@@ -85,7 +85,7 @@ public class WebViewActivity extends Activity {
         WebView.setWebContentsDebuggingEnabled(true);
     }
 
-        webView.loadUrl("https://recoverytrek-snb.scanovate.com?sid=Q1ellnrzIpJ8mNNYZ9tdb8jHKSdUk0i6Q9u4UZ712MwCN7dAcR+f+XltlugHY6qBdxJ+Q8Nka2L10lQtApLVgMADd5YG1ksUwJtHea5Nk67gDh1eDQ8oxFYGcWPWzlzicIADwRPSMQqayfDONWNJY9TqP6Kgsvos6oPYvP65Gmc=&process_id=9ad9a4b8-ec19-4b1b-8aec-8ddf7630ec0a");
+        webView.loadUrl("data link create from 61 or 69 flow");
 }
 
     // Helper func

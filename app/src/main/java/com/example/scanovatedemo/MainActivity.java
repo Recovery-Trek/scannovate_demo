@@ -1,5 +1,6 @@
 package com.example.scanovatedemo;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,15 +18,24 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
     boolean isCameraApproved = false;
@@ -125,36 +135,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("Token form result", token);
 
                 // Use token for getting the result from the server
-
-                RequestQueue queue = Volley.newRequestQueue(this);
                 String url ="https://btrust-api-snb.scanovate.com/results/"+token;
-
-                // Request a string response from the provided URL.
-                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                        new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
-                                // Display the first 500 characters of the response string.
-//                                textView.setText("Response is: "+ response.substring(0,500));
-                                JSONObject reader = null;
-                                try {
-                                    reader = new JSONObject(response);
-
-                                    Log.d("Response", String.valueOf(reader));
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-
-                            }
-                        }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("REQUEST","That didn't work!");
-                    }
-                });
-
-// Add the request to the RequestQueue.
-                queue.add(stringRequest);
+                runOnUiThread(() -> sendRequest(url));
             }
             if (resultCode == Activity.RESULT_CANCELED) {
                 //Write your code if there's no result
@@ -163,5 +145,54 @@ public class MainActivity extends AppCompatActivity {
         }
 
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    public void sendRequest( String url) {
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(20, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.SECONDS)
+                .build();
+
+
+        okhttp3.Request.Builder requestBuilder = new Request.Builder();
+        requestBuilder.get();
+        requestBuilder.url(url);
+        requestBuilder.addHeader("Authorization", "Bearer d00980c5-17b9-4d37-86fd-bd16929028eb");
+        Call call = client.newCall(requestBuilder.build());
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (call != null)
+                    Log.e("onFailure: request",call.toString());
+
+                if (e != null) {
+                    String errorMessage = e.getLocalizedMessage();
+                    Log.e("onFailure: exception",errorMessage);
+                }
+                else {
+                    Log.e("error","Unable to reach MobileTrek servers. Error code: 100");
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response != null) {
+                    String responseStr = response.body().string();
+
+
+                    Log.d("onResponse", responseStr);
+                    if (responseStr.equals("\"success\"")) {
+                        Log.d("Response","success");
+
+                    }
+                    else {
+                        Log.e("Response"," Error code: 102");
+                    }
+                }
+                else {
+                    Log.d(TAG, "onResponse: reponse = null");
+                }
+            }
+        });
     }
 }
